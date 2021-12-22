@@ -1,0 +1,615 @@
+fileTypes: [
+  "yaml"
+]
+name: "MiniYAML"
+patterns: [
+  {
+    include: "#comment"
+  }
+  {
+    include: "#property"
+  }
+  {
+    include: "#directive"
+  }
+  {
+    include: "#node"
+  }
+]
+repository:
+  "block-collection":
+    patterns: [
+      {
+        include: "#block-sequence"
+      }
+      {
+        include: "#block-mapping"
+      }
+    ]
+  "block-mapping":
+    patterns: [
+      {
+        include: "#block-pair"
+      }
+    ]
+  "block-node":
+    patterns: [
+      {
+        include: "#prototype"
+      }
+      {
+        include: "#block-scalar"
+      }
+      {
+        include: "#block-collection"
+      }
+      {
+        include: "#flow-scalar-plain-out"
+      }
+      {
+        include: "#flow-node"
+      }
+    ]
+  "block-pair":
+    patterns: [
+      {
+        begin: "\\?"
+        beginCaptures:
+          "1":
+            name: "punctuation.definition.key-value.begin.miniyaml"
+        end: "(?=\\?)|^ *(:)|(:)"
+        endCaptures:
+          "1":
+            name: "punctuation.separator.key-value.mapping.miniyaml"
+          "2":
+            name: "invalid.illegal.expected-newline.miniyaml"
+        name: "meta.block-mapping.miniyaml"
+        patterns: [
+          {
+            include: "#block-node"
+          }
+        ]
+      }
+      {
+        begin: '''
+          (?x)
+                                  (?=
+                                      (?x:
+                                            [^\\s[-?:,\\[\\]{}#&*!|>'"%@`]]
+                                          | [?:-] \\S
+                                      )
+                                      (
+                                            [^\\s:]
+                                          | : \\S
+                                          | \\s+ (?![#\\s])
+                                      )*
+                                      \\s*
+                                      :
+                                     (\\s|$)
+                                  )
+                              
+        '''
+        end: '''
+          (?x)
+                                  (?=
+                                        \\s* $
+                                      | \\s+ \\#
+                                      | \\s* : (\\s|$)
+                                  )
+                              
+        '''
+        patterns: [
+          {
+            include: "#flow-scalar-plain-out-implicit-type"
+          }
+          {
+            begin: '''
+              (?x)
+                                                [^\\s[-?:,\\[\\]{}#&*!|>'"%@`]]
+                                              | [?:-] \\S
+                                          
+            '''
+            beginCaptures:
+              "0":
+                name: "entity.name.tag.miniyaml"
+            contentName: "entity.name.tag.miniyaml"
+            end: '''
+              (?x)
+                                              (?=
+                                                    \\s* $
+                                                  | \\s+ \\#
+                                                  | \\s* : (\\s|$)
+                                              )
+                                          
+            '''
+            name: "string.unquoted.plain.out.miniyaml"
+          }
+        ]
+      }
+      {
+        match: ":(?=\\s|$)"
+        name: "punctuation.separator.key-value.mapping.miniyaml"
+      }
+    ]
+  "block-sequence":
+    match: "(-)(?!\\S)"
+    name: "punctuation.definition.block.sequence.item.miniyaml"
+  comment:
+    begin: "(?:(^[ \\t]*)|[ \\t]+)(?=#\\p{Print}*$)"
+    beginCaptures:
+      "1":
+        name: "punctuation.whitespace.comment.leading.miniyaml"
+    end: "(?!\\G)"
+    patterns: [
+      {
+        begin: "#"
+        beginCaptures:
+          "0":
+            name: "punctuation.definition.comment.miniyaml"
+        end: "\\n"
+        name: "comment.line.number-sign.miniyaml"
+      }
+    ]
+  directive:
+    begin: "^%"
+    beginCaptures:
+      "0":
+        name: "punctuation.definition.directive.begin.miniyaml"
+    end: "(?=$|[ \\t]+($|#))"
+    name: "meta.directive.miniyaml"
+    patterns: [
+      {
+        captures:
+          "1":
+            name: "keyword.other.directive.tag.miniyaml"
+          "2":
+            name: "storage.type.tag-handle.miniyaml"
+          "3":
+            name: "support.type.tag-prefix.miniyaml"
+        match: '''
+          (?x)
+                                  \\G
+                                  (TAG)
+                                  (?:[ \\t]+
+                                      ((?:!(?:[0-9A-Za-z\\-]*!)?))
+                                      (?:[ \\t]+ (
+                                            !              (?x: %[0-9A-Fa-f]{2} | [0-9A-Za-z\\-#;/?:@&=+$,_.!~*'()\\[\\]] )*
+                                          | (?![,!\\[\\]{}]) (?x: %[0-9A-Fa-f]{2} | [0-9A-Za-z\\-#;/?:@&=+$,_.!~*'()\\[\\]] )+
+                                          )
+                                      )?
+                                  )?
+                              
+        '''
+      }
+      {
+        captures:
+          "1":
+            name: "support.other.directive.reserved.miniyaml"
+          "2":
+            name: "string.unquoted.directive-name.miniyaml"
+          "3":
+            name: "string.unquoted.directive-parameter.miniyaml"
+        match: "(?x) \\G (\\w+) (?:[ \\t]+ (\\w+) (?:[ \\t]+ (\\w+))? )?"
+      }
+      {
+        match: "\\S+"
+        name: "invalid.illegal.unrecognized.miniyaml"
+      }
+    ]
+  "flow-alias":
+    captures:
+      "1":
+        name: "keyword.control.flow.alias.miniyaml"
+      "2":
+        name: "punctuation.definition.alias.miniyaml"
+      "3":
+        name: "variable.other.alias.miniyaml"
+      "4":
+        name: "invalid.illegal.character.anchor.miniyaml"
+    match: "((\\*))([^\\s\\[\\]/{/},]+)([^\\s\\]},]\\S*)?"
+  "flow-collection":
+    patterns: [
+      {
+        include: "#flow-sequence"
+      }
+      {
+        include: "#flow-mapping"
+      }
+    ]
+  "flow-mapping":
+    begin: "\\{"
+    beginCaptures:
+      "0":
+        name: "punctuation.definition.mapping.begin.miniyaml"
+    end: "\\}"
+    endCaptures:
+      "0":
+        name: "punctuation.definition.mapping.end.miniyaml"
+    name: "meta.flow-mapping.miniyaml"
+    patterns: [
+      {
+        include: "#prototype"
+      }
+      {
+        match: ","
+        name: "punctuation.separator.mapping.miniyaml"
+      }
+      {
+        include: "#flow-pair"
+      }
+    ]
+  "flow-node":
+    patterns: [
+      {
+        include: "#prototype"
+      }
+      {
+        include: "#flow-alias"
+      }
+      {
+        include: "#flow-collection"
+      }
+      {
+        include: "#flow-scalar"
+      }
+    ]
+  "flow-pair":
+    patterns: [
+      {
+        begin: "\\?"
+        beginCaptures:
+          "0":
+            name: "punctuation.definition.key-value.begin.miniyaml"
+        end: "(?=[},\\]])"
+        name: "meta.flow-pair.explicit.miniyaml"
+        patterns: [
+          {
+            include: "#prototype"
+          }
+          {
+            include: "#flow-pair"
+          }
+          {
+            include: "#flow-node"
+          }
+          {
+            begin: ":(?=\\s|$|[\\[\\]{},])"
+            beginCaptures:
+              "0":
+                name: "punctuation.separator.key-value.mapping.miniyaml"
+            end: "(?=[},\\]])"
+            patterns: [
+              {
+                include: "#flow-value"
+              }
+            ]
+          }
+        ]
+      }
+      {
+        begin: '''
+          (?x)
+                                  (?=
+                                      (?:
+                                          [^\\s[-?:,\\[\\]{}#&*!|>'"%@`]]
+                                        | [?:-] [^\\s[\\[\\]{},]]
+                                      )
+                                      (
+                                            [^\\s:[\\[\\]{},]]
+                                          | : [^\\s[\\[\\]{},]]
+                                          | \\s+ (?![#\\s])
+                                      )*
+                                      \\s*
+                                      :
+          							(\\s|$)
+                                  )
+                              
+        '''
+        end: '''
+          (?x)
+                                  (?=
+                                        \\s* $
+                                      | \\s+ \\#
+                                      | \\s* : (\\s|$)
+                                      | \\s* : [\\[\\]{},]
+                                      | \\s* [\\[\\]{},]
+                                  )
+                              
+        '''
+        name: "meta.flow-pair.key.miniyaml"
+        patterns: [
+          {
+            include: "#flow-scalar-plain-in-implicit-type"
+          }
+          {
+            begin: '''
+              (?x)
+                                                [^\\s[-?:,\\[\\]{}#&*!|>'"%@`]]
+                                              | [?:-] [^\\s[\\[\\]{},]]
+                                          
+            '''
+            beginCaptures:
+              "0":
+                name: "entity.name.tag.miniyaml"
+            contentName: "entity.name.tag.miniyaml"
+            end: '''
+              (?x)
+                                              (?=
+                                                    \\s* $
+                                                  | \\s+ \\#
+                                                  | \\s* : (\\s|$)
+                                                  | \\s* : [\\[\\]{},]
+                                                  | \\s* [\\[\\]{},]
+                                              )
+                                          
+            '''
+            name: "string.unquoted.plain.in.miniyaml"
+          }
+        ]
+      }
+      {
+        include: "#flow-node"
+      }
+      {
+        begin: ":(?=\\s|$|[\\[\\]{},])"
+        captures:
+          "0":
+            name: "punctuation.separator.key-value.mapping.miniyaml"
+        end: "(?=[},\\]])"
+        name: "meta.flow-pair.miniyaml"
+        patterns: [
+          {
+            include: "#flow-value"
+          }
+        ]
+      }
+    ]
+  "flow-scalar":
+    patterns: [
+      {
+        include: "#flow-scalar-double-quoted"
+      }
+      {
+        include: "#flow-scalar-single-quoted"
+      }
+      {
+        include: "#flow-scalar-plain-in"
+      }
+    ]
+  "flow-scalar-double-quoted":
+    begin: "\""
+    beginCaptures:
+      "0":
+        name: "punctuation.definition.string.begin.miniyaml"
+    end: "\""
+    endCaptures:
+      "0":
+        name: "punctuation.definition.string.end.miniyaml"
+    name: "string.quoted.double.miniyaml"
+    patterns: [
+      {
+        match: "\\\\([0abtnvfre \"/\\\\N_Lp]|x\\d\\d|u\\d{4}|U\\d{8})"
+        name: "constant.character.escape.miniyaml"
+      }
+      {
+        match: "\\\\\\n"
+        name: "constant.character.escape.double-quoted.newline.miniyaml"
+      }
+    ]
+  "flow-scalar-plain-in":
+    patterns: [
+      {
+        include: "#flow-scalar-plain-in-implicit-type"
+      }
+      {
+        begin: '''
+          (?x)
+                                    [^\\s[-?:,\\[\\]{}#&*!|>'"%@`]]
+                                  | [?:-] [^\\s[\\[\\]{},]]
+                              
+        '''
+        end: '''
+          (?x)
+                                  (?=
+                                        \\s* $
+                                      | \\s+ \\#
+                                      | \\s* : (\\s|$)
+                                      | \\s* : [\\[\\]{},]
+                                      | \\s* [\\[\\]{},]
+                                  )
+                              
+        '''
+        name: "string.unquoted.plain.in.miniyaml"
+      }
+    ]
+  "flow-scalar-plain-in-implicit-type":
+    patterns: [
+      {
+        captures:
+          "1":
+            name: "constant.language.boolean.miniyaml"
+          "2":
+            name: "constant.numeric.integer.miniyaml"
+          "3":
+            name: "constant.numeric.float.miniyaml"
+        match: '''
+          (?x)
+                                  (?x:
+                                      (yes|Yes|YES|no|No|NO|true|True|TRUE|false|False|FALSE)
+                                      | (
+                                          (?:
+                                              [-+]? (?: 0|[1-9][0-9_]*) # (base 10)
+                                          )
+                                        )
+                                      | (
+                                          (?x:
+                                              [-+]? (?: [0-9] [0-9_]*)? \\. [0-9.]* (?: [eE] [-+] [0-9]+)? # (base 10)
+                                          )
+                                        )
+                                  )
+                              
+        '''
+      }
+    ]
+  "flow-scalar-plain-out":
+    patterns: [
+      {
+        include: "#flow-scalar-plain-out-implicit-type"
+      }
+      {
+        begin: '''
+          (?x)
+                                    [^\\s[-?:,\\[\\]{}#&*!|>'"%@`]]
+                                  | [?:-] \\S
+                              
+        '''
+        end: '''
+          (?x)
+                                  (?=
+                                        \\s* $
+                                      | \\s+ \\#
+                                      | \\s* : (\\s|$)
+                                  )
+                              
+        '''
+        name: "string.unquoted.plain.out.miniyaml"
+      }
+    ]
+  "flow-scalar-plain-out-implicit-type":
+    patterns: [
+      {
+        captures:
+          "1":
+            name: "constant.language.boolean.miniyaml"
+          "2":
+            name: "constant.numeric.integer.miniyaml"
+          "3":
+            name: "constant.numeric.float.miniyaml"
+        match: '''
+          (?x)
+                                  (?x:
+                                      | (yes|Yes|YES|no|No|NO|true|True|TRUE|false|False|FALSE)
+                                      | (
+                                          (?:
+                                              | [-+]? (?: 0|[1-9][0-9_]*) # (base 10)
+                                          )
+                                        )
+                                      | (
+                                          (?x:
+                                                [-+]? (?: [0-9] [0-9_]*)? \\. [0-9.]* (?: [eE] [-+] [0-9]+)? # (base 10)
+                                          )
+                                        )
+                                  )
+                                  (?x:
+                                      (?=
+                                            \\s* $
+                                          | \\s+ \\#
+                                          | \\s* : (\\s|$)
+                                      )
+                                  )
+                              
+        '''
+      }
+    ]
+  "flow-scalar-single-quoted":
+    begin: "'"
+    beginCaptures:
+      "0":
+        name: "punctuation.definition.string.begin.miniyaml"
+    end: "'(?!')"
+    endCaptures:
+      "0":
+        name: "punctuation.definition.string.end.miniyaml"
+    name: "string.quoted.single.miniyaml"
+    patterns: [
+      {
+        match: "''"
+        name: "constant.character.escape.single-quoted.miniyaml"
+      }
+    ]
+  "flow-sequence":
+    begin: "\\["
+    beginCaptures:
+      "0":
+        name: "punctuation.definition.sequence.begin.miniyaml"
+    end: "\\]"
+    endCaptures:
+      "0":
+        name: "punctuation.definition.sequence.end.miniyaml"
+    name: "meta.flow-sequence.miniyaml"
+    patterns: [
+      {
+        include: "#prototype"
+      }
+      {
+        match: ","
+        name: "punctuation.separator.sequence.miniyaml"
+      }
+      {
+        include: "#flow-pair"
+      }
+      {
+        include: "#flow-node"
+      }
+    ]
+  "flow-value":
+    patterns: [
+      {
+        begin: "\\G(?![},\\]])"
+        end: "(?=[},\\]])"
+        name: "meta.flow-pair.value.miniyaml"
+        patterns: [
+          {
+            include: "#flow-node"
+          }
+        ]
+      }
+    ]
+  node:
+    patterns: [
+      {
+        include: "#block-node"
+      }
+    ]
+  property:
+    begin: "(?=!|&)"
+    end: "(?!\\G)"
+    name: "meta.property.miniyaml"
+    patterns: [
+      {
+        captures:
+          "1":
+            name: "keyword.control.property.anchor.miniyaml"
+          "2":
+            name: "punctuation.definition.anchor.miniyaml"
+          "3":
+            name: "entity.name.type.anchor.miniyaml"
+          "4":
+            name: "invalid.illegal.character.anchor.miniyaml"
+        match: "\\G((&))([^\\s\\[\\]/{/},]+)(\\S+)?"
+      }
+      {
+        match: '''
+          (?x)
+                                  \\G
+                                  (?:
+                                      ! < (?: %[0-9A-Fa-f]{2} | [0-9A-Za-z\\-#;/?:@&=+$,_.!~*'()\\[\\]] )+ >
+                                    | (?:!(?:[0-9A-Za-z\\-]*!)?) (?: %[0-9A-Fa-f]{2} | [0-9A-Za-z\\-#;/?:@&=+$_.~*'()] )+
+                                    | !
+                                  )
+                                  (?=\\ |\\t|$)
+                              
+        '''
+        name: "storage.type.tag-handle.miniyaml"
+      }
+    ]
+  prototype:
+    patterns: [
+      {
+        include: "#comment"
+      }
+      {
+        include: "#property"
+      }
+    ]
+scopeName: "source.miniyaml"
