@@ -1,615 +1,376 @@
-fileTypes: [
-  "yaml"
+'scopeName': 'source.miniyaml'
+'name': 'MiniYAML'
+'fileTypes': [
+  'yaml'
 ]
-name: "MiniYAML"
-patterns: [
+'patterns': [
   {
-    include: "#comment"
+    'include': '#comment'
   }
   {
-    include: "#property"
+    # - >
+    # - |
+    # - hello: >
+    # - hello: |
+    'begin': '^(\\s*)(?:(-)|(?:(?:(-)(\\s*))?([^!@#%&*>,][^:#]*\\S)\\s*(:)))(?:\\s+((!)[^!\\s]+))?\\s+(?=\\||>)'
+    'beginCaptures':
+      '2':
+        'name': 'punctuation.definition.entry.yaml'
+      '3':
+        'name': 'punctuation.definition.entry.yaml'
+      '5':
+        'name': 'entity.name.tag.yaml'
+      '6':
+        'name': 'punctuation.separator.key-value.yaml'
+      '7':
+        'name': 'keyword.other.tag.local.yaml'
+      '8':
+        'name': 'punctuation.definition.tag.local.yaml'
+    'end': '^((?!$)(?!\\1\\s+)|(?=\\s\\4(-|[^\\s!@#%&*>,].*:\\s+)))'
+    'contentName': 'string.unquoted.block.yaml'
+    'patterns': [
+      {
+        # Comments can only appear on the same line as the tag name
+        'begin': '\\G'
+        'end': '$'
+        'patterns': [
+          {
+            'include': '#comment'
+          }
+        ]
+      }
+      {
+        'include': '#constants'
+      }
+      {
+        'include': '#erb'
+      }
+    ]
   }
   {
-    include: "#directive"
+    # hello: >
+    # hello: |
+    'begin': '^(\\s*)([^!@#%&*>,][^:#]*\\S)\\s*(:)(?:\\s+((!)[^!\\s]+))?\\s+(?=\\||>)'
+    'beginCaptures':
+      '2':
+        'name': 'entity.name.tag.yaml'
+      '3':
+        'name': 'punctuation.separator.key-value.yaml'
+      '4':
+        'name': 'keyword.other.tag.local.yaml'
+      '5':
+        'name': 'punctuation.definition.tag.local.yaml'
+    'end': '^(?!$)(?!\\1\\s+)'
+    'contentName': 'string.unquoted.block.yaml'
+    'patterns': [
+      {
+        # Comments can only appear on the same line as the tag name
+        'begin': '\\G'
+        'end': '$'
+        'patterns': [
+          {
+            'include': '#comment'
+          }
+        ]
+      }
+      {
+        'include': '#constants'
+      }
+      {
+        'include': '#erb'
+      }
+    ]
   }
   {
-    include: "#node"
+    # << : *variableToMerge
+    'match': '(<<)\\s*(:)\\s+(.+)$'
+    'captures':
+      '1':
+        'name': 'entity.name.tag.merge.yaml'
+      '2':
+        'name': 'punctuation.separator.key-value.yaml'
+      '3':
+        'patterns': [
+          {
+            'include': '#variables'
+          }
+        ]
+  }
+  {
+    # - hello:
+    # look at me go:
+    # TODO remove: !!omap
+    'begin': '(?>^(\\s*)(-)?\\s*)([^!{@#%&*>,\'"][^#]*?)(:)\\s+((!!)omap)?'
+    'beginCaptures':
+      '2':
+        'name': 'punctuation.definition.entry.yaml'
+      '3':
+        'name': 'entity.name.tag.yaml'
+      '4':
+        'name': 'punctuation.separator.key-value.yaml'
+      '5':
+        'name': 'keyword.other.omap.yaml'
+      '6':
+        'name': 'punctuation.definition.tag.omap.yaml'
+    'end': '^((?!\\1\\s+)|(?=\\1\\s*(-|[^!@#%&*>,].*:\\s+|#)))'
+    'patterns': [
+      {
+        'include': '#scalar-content'
+      }
+    ]
+  }
+  {
+    # - 'quoted':
+    # "quoted":
+    # TODO remove: !!omap
+    'begin': '^(\\s*)(-)?\\s*(?:((\')([^\']*?)(\'))|((")([^"]*?)(")))(:)\\s+((!!)omap)?'
+    'beginCaptures':
+      '2':
+        'name': 'punctuation.definition.entry.yaml'
+      '3':
+        'name': 'string.quoted.single.yaml'
+      '4':
+        'name': 'punctuation.definition.string.begin.yaml'
+      '5':
+        'name': 'entity.name.tag.yaml'
+      '6':
+        'name': 'punctuation.definition.string.end.yaml'
+      '7':
+        'name': 'string.quoted.double.yaml'
+      '8':
+        'name': 'punctuation.definition.string.begin.yaml'
+      '9':
+        'name': 'entity.name.tag.yaml'
+      '10':
+        'name': 'punctuation.definition.string.end.yaml'
+      '11':
+        'name': 'punctuation.separator.key-value.yaml'
+      '12':
+        'name': 'keyword.other.omap.yaml'
+      '13':
+        'name': 'punctuation.definition.tag.omap.yaml'
+    'end': '^((?!\\1\\s+)|(?=\\1\\s*(-|[^!@#%&*>,].*:\\s+|#)))'
+    'patterns': [
+      {
+        'include': '#scalar-content'
+      }
+    ]
+  }
+  {
+    # - stuff
+    # - TODO remove: !!omap
+    # -
+    'begin': '^(\\s*)(-)\\s+(?:((!!)omap)|((!)[^!\\s]+)|(?![!@#%&*>,]))'
+    'beginCaptures':
+      '2':
+        'name': 'punctuation.definition.entry.yaml'
+      '3':
+        'name': 'keyword.other.omap.yaml'
+      '4':
+        'name': 'punctuation.definition.tag.omap.yaml'
+      '5':
+        'name': 'keyword.other.tag.local.yaml'
+      '6':
+        'name': 'punctuation.definition.tag.local.yaml'
+    'end': '^((?!\\1\\s+)|(?=\\1\\s*(-|[^!@#%&*>,].*:\\s+|#)))'
+    'patterns': [
+      {
+        'include': '#scalar-content'
+      }
+    ]
+  }
+  {
+    'include': '#variables'
+  }
+  {
+    'include': '#strings'
   }
 ]
-repository:
-  "block-collection":
-    patterns: [
+'repository':
+  'comment':
+    'begin': '(?<=^|\\s)#(?!{)'
+    'beginCaptures':
+      '0':
+        'name': 'punctuation.definition.comment.yaml'
+    'end': '$'
+    'name': 'comment.line.number-sign.yaml'
+  'constants':
+    'match': '(?<=\\s)(true|false|null|True|False|Null|TRUE|FALSE|NULL|~)(?=\\s*$)'
+    'name': 'constant.language.yaml'
+  'date':
+    'match': '([0-9]{4}-[0-9]{2}-[0-9]{2})\\s*($|(?=#)(?!#{))'
+    'captures':
+      '1':
+        'name': 'constant.other.date.yaml'
+  'erb':
+    'begin': '<%+(?!>)=?'
+    'beginCaptures':
+      '0':
+        'name': 'punctuation.definition.embedded.begin.ruby'
+    'contentName': 'source.ruby.rails'
+    'end': '(%)>'
+    'endCaptures':
+      '0':
+        'name': 'punctuation.definition.embedded.end.ruby'
+      '1':
+        'name': 'source.ruby.rails'
+    'name': 'meta.embedded.line.ruby'
+    'patterns': [
       {
-        include: "#block-sequence"
+        'captures':
+          '1':
+            'name': 'punctuation.definition.comment.ruby'
+        'match': '(#).*?(?=%>)'
+        'name': 'comment.line.number-sign.ruby'
       }
       {
-        include: "#block-mapping"
+        'include': 'source.ruby.rails'
       }
     ]
-  "block-mapping":
-    patterns: [
+  'escaped_char':
+    # http://yaml.org/spec/1.2/spec.html#id2776092
+    'patterns': [
       {
-        include: "#block-pair"
+        'match': '\\\\u[A-Fa-f0-9]{4}'
+        'name': 'constant.character.escape.yaml'
+      }
+      {
+        'match': '\\\\U[A-Fa-f0-9]{8}'
+        'name': 'constant.character.escape.yaml'
+      }
+      {
+        'match': '\\\\x[0-9A-Fa-f]{2}'
+        'name': 'constant.character.escape.yaml'
+      }
+      {
+        'match': '\\\\[0abtnvfre "/\\\\N_LP]' # Space is intentional
+        'name': 'constant.character.escape.yaml'
+      }
+      {
+        'match': '\\\\(u.{4}|U.{8}|x.{2}|.)'
+        'name': 'invalid.illegal.escape.yaml'
       }
     ]
-  "block-node":
-    patterns: [
+  'numeric':
+    # http://www.yaml.org/spec/1.2/spec.html#id2805071
+    'patterns': [
       {
-        include: "#prototype"
+        'match': '[-+]?[0-9]+(?=\\s*($|#(?!#{)))'
+        'name': 'constant.numeric.integer.yaml'
       }
       {
-        include: "#block-scalar"
+        'match': '0o[0-7]+(?=\\s*($|#(?!#{)))'
+        'name': 'constant.numeric.octal.yaml'
       }
       {
-        include: "#block-collection"
+        'match': '0x[0-9a-fA-F]+(?=\\s*($|#(?!#{)))'
+        'name': 'constant.numeric.hexadecimal.yaml'
       }
       {
-        include: "#flow-scalar-plain-out"
+        'match': '[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?(?=\\s*($|#(?!#{)))'
+        'name': 'constant.numeric.float.yaml'
       }
       {
-        include: "#flow-node"
+        'match': '[-+]?(\.inf|\.Inf|\.INF)(?=\\s*($|#(?!#{)))'
+        'name': 'constant.numeric.float.yaml'
+      }
+      {
+        'match': '(\.nan|\.NaN|\.NAN)(?=\\s*($|#(?!#{)))'
+        'name': 'constant.numeric.float.yaml'
       }
     ]
-  "block-pair":
-    patterns: [
+  'strings':
+    'patterns': [
       {
-        begin: "\\?"
-        beginCaptures:
-          "1":
-            name: "punctuation.definition.key-value.begin.miniyaml"
-        end: "(?=\\?)|^ *(:)|(:)"
-        endCaptures:
-          "1":
-            name: "punctuation.separator.key-value.mapping.miniyaml"
-          "2":
-            name: "invalid.illegal.expected-newline.miniyaml"
-        name: "meta.block-mapping.miniyaml"
-        patterns: [
+        'begin': '"'
+        'beginCaptures':
+          '0':
+            'name': 'punctuation.definition.string.begin.yaml'
+        'end': '"'
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.string.end.yaml'
+        'name': 'string.quoted.double.yaml'
+        'patterns': [
           {
-            include: "#block-node"
+            'include': '#escaped_char'
+          }
+          {
+            'include': '#erb'
           }
         ]
       }
       {
-        begin: '''
-          (?x)
-                                  (?=
-                                      (?x:
-                                            [^\\s[-?:,\\[\\]{}#&*!|>'"%@`]]
-                                          | [?:-] \\S
-                                      )
-                                      (
-                                            [^\\s:]
-                                          | : \\S
-                                          | \\s+ (?![#\\s])
-                                      )*
-                                      \\s*
-                                      :
-                                     (\\s|$)
-                                  )
-                              
-        '''
-        end: '''
-          (?x)
-                                  (?=
-                                        \\s* $
-                                      | \\s+ \\#
-                                      | \\s* : (\\s|$)
-                                  )
-                              
-        '''
-        patterns: [
+        # Per http://www.yaml.org/spec/1.2/spec.html#id2788097, only single quotes can be escaped
+        'begin': "'"
+        'beginCaptures':
+          '0':
+            'name': 'punctuation.definition.string.begin.yaml'
+        'end': "'"
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.string.end.yaml'
+        'name': 'string.quoted.single.yaml'
+        'applyEndPatternLast': true
+        'patterns': [
           {
-            include: "#flow-scalar-plain-out-implicit-type"
+            'match': "''"
+            'name': 'constant.character.escape.yaml'
           }
           {
-            begin: '''
-              (?x)
-                                                [^\\s[-?:,\\[\\]{}#&*!|>'"%@`]]
-                                              | [?:-] \\S
-                                          
-            '''
-            beginCaptures:
-              "0":
-                name: "entity.name.tag.miniyaml"
-            contentName: "entity.name.tag.miniyaml"
-            end: '''
-              (?x)
-                                              (?=
-                                                    \\s* $
-                                                  | \\s+ \\#
-                                                  | \\s* : (\\s|$)
-                                              )
-                                          
-            '''
-            name: "string.unquoted.plain.out.miniyaml"
+            'include': '#erb'
           }
         ]
       }
       {
-        match: ":(?=\\s|$)"
-        name: "punctuation.separator.key-value.mapping.miniyaml"
-      }
-    ]
-  "block-sequence":
-    match: "(-)(?!\\S)"
-    name: "punctuation.definition.block.sequence.item.miniyaml"
-  comment:
-    begin: "(?:(^[ \\t]*)|[ \\t]+)(?=#\\p{Print}*$)"
-    beginCaptures:
-      "1":
-        name: "punctuation.whitespace.comment.leading.miniyaml"
-    end: "(?!\\G)"
-    patterns: [
-      {
-        begin: "#"
-        beginCaptures:
-          "0":
-            name: "punctuation.definition.comment.miniyaml"
-        end: "\\n"
-        name: "comment.line.number-sign.miniyaml"
-      }
-    ]
-  directive:
-    begin: "^%"
-    beginCaptures:
-      "0":
-        name: "punctuation.definition.directive.begin.miniyaml"
-    end: "(?=$|[ \\t]+($|#))"
-    name: "meta.directive.miniyaml"
-    patterns: [
-      {
-        captures:
-          "1":
-            name: "keyword.other.directive.tag.miniyaml"
-          "2":
-            name: "storage.type.tag-handle.miniyaml"
-          "3":
-            name: "support.type.tag-prefix.miniyaml"
-        match: '''
-          (?x)
-                                  \\G
-                                  (TAG)
-                                  (?:[ \\t]+
-                                      ((?:!(?:[0-9A-Za-z\\-]*!)?))
-                                      (?:[ \\t]+ (
-                                            !              (?x: %[0-9A-Fa-f]{2} | [0-9A-Za-z\\-#;/?:@&=+$,_.!~*'()\\[\\]] )*
-                                          | (?![,!\\[\\]{}]) (?x: %[0-9A-Fa-f]{2} | [0-9A-Za-z\\-#;/?:@&=+$,_.!~*'()\\[\\]] )+
-                                          )
-                                      )?
-                                  )?
-                              
-        '''
-      }
-      {
-        captures:
-          "1":
-            name: "support.other.directive.reserved.miniyaml"
-          "2":
-            name: "string.unquoted.directive-name.miniyaml"
-          "3":
-            name: "string.unquoted.directive-parameter.miniyaml"
-        match: "(?x) \\G (\\w+) (?:[ \\t]+ (\\w+) (?:[ \\t]+ (\\w+))? )?"
-      }
-      {
-        match: "\\S+"
-        name: "invalid.illegal.unrecognized.miniyaml"
-      }
-    ]
-  "flow-alias":
-    captures:
-      "1":
-        name: "keyword.control.flow.alias.miniyaml"
-      "2":
-        name: "punctuation.definition.alias.miniyaml"
-      "3":
-        name: "variable.other.alias.miniyaml"
-      "4":
-        name: "invalid.illegal.character.anchor.miniyaml"
-    match: "((\\*))([^\\s\\[\\]/{/},]+)([^\\s\\]},]\\S*)?"
-  "flow-collection":
-    patterns: [
-      {
-        include: "#flow-sequence"
-      }
-      {
-        include: "#flow-mapping"
-      }
-    ]
-  "flow-mapping":
-    begin: "\\{"
-    beginCaptures:
-      "0":
-        name: "punctuation.definition.mapping.begin.miniyaml"
-    end: "\\}"
-    endCaptures:
-      "0":
-        name: "punctuation.definition.mapping.end.miniyaml"
-    name: "meta.flow-mapping.miniyaml"
-    patterns: [
-      {
-        include: "#prototype"
-      }
-      {
-        match: ","
-        name: "punctuation.separator.mapping.miniyaml"
-      }
-      {
-        include: "#flow-pair"
-      }
-    ]
-  "flow-node":
-    patterns: [
-      {
-        include: "#prototype"
-      }
-      {
-        include: "#flow-alias"
-      }
-      {
-        include: "#flow-collection"
-      }
-      {
-        include: "#flow-scalar"
-      }
-    ]
-  "flow-pair":
-    patterns: [
-      {
-        begin: "\\?"
-        beginCaptures:
-          "0":
-            name: "punctuation.definition.key-value.begin.miniyaml"
-        end: "(?=[},\\]])"
-        name: "meta.flow-pair.explicit.miniyaml"
-        patterns: [
+        'begin': '`'
+        'beginCaptures':
+          '0':
+            'name': 'punctuation.definition.string.begin.yaml'
+        'end': '`'
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.string.end.yaml'
+        'name': 'string.interpolated.yaml'
+        'patterns': [
           {
-            include: "#prototype"
+            'include': '#escaped_char'
           }
           {
-            include: "#flow-pair"
-          }
-          {
-            include: "#flow-node"
-          }
-          {
-            begin: ":(?=\\s|$|[\\[\\]{},])"
-            beginCaptures:
-              "0":
-                name: "punctuation.separator.key-value.mapping.miniyaml"
-            end: "(?=[},\\]])"
-            patterns: [
-              {
-                include: "#flow-value"
-              }
-            ]
+            'include': '#erb'
           }
         ]
       }
       {
-        begin: '''
-          (?x)
-                                  (?=
-                                      (?:
-                                          [^\\s[-?:,\\[\\]{}#&*!|>'"%@`]]
-                                        | [?:-] [^\\s[\\[\\]{},]]
-                                      )
-                                      (
-                                            [^\\s:[\\[\\]{},]]
-                                          | : [^\\s[\\[\\]{},]]
-                                          | \\s+ (?![#\\s])
-                                      )*
-                                      \\s*
-                                      :
-          							(\\s|$)
-                                  )
-                              
-        '''
-        end: '''
-          (?x)
-                                  (?=
-                                        \\s* $
-                                      | \\s+ \\#
-                                      | \\s* : (\\s|$)
-                                      | \\s* : [\\[\\]{},]
-                                      | \\s* [\\[\\]{},]
-                                  )
-                              
-        '''
-        name: "meta.flow-pair.key.miniyaml"
-        patterns: [
-          {
-            include: "#flow-scalar-plain-in-implicit-type"
-          }
-          {
-            begin: '''
-              (?x)
-                                                [^\\s[-?:,\\[\\]{}#&*!|>'"%@`]]
-                                              | [?:-] [^\\s[\\[\\]{},]]
-                                          
-            '''
-            beginCaptures:
-              "0":
-                name: "entity.name.tag.miniyaml"
-            contentName: "entity.name.tag.miniyaml"
-            end: '''
-              (?x)
-                                              (?=
-                                                    \\s* $
-                                                  | \\s+ \\#
-                                                  | \\s* : (\\s|$)
-                                                  | \\s* : [\\[\\]{},]
-                                                  | \\s* [\\[\\]{},]
-                                              )
-                                          
-            '''
-            name: "string.unquoted.plain.in.miniyaml"
-          }
-        ]
-      }
-      {
-        include: "#flow-node"
-      }
-      {
-        begin: ":(?=\\s|$|[\\[\\]{},])"
-        captures:
-          "0":
-            name: "punctuation.separator.key-value.mapping.miniyaml"
-        end: "(?=[},\\]])"
-        name: "meta.flow-pair.miniyaml"
-        patterns: [
-          {
-            include: "#flow-value"
-          }
-        ]
+        'match': '[^\\s"\'\\n](?!\\s*#(?!{))([^#\\n]|((?<!\\s)#))*'
+        'name': 'string.unquoted.yaml'
       }
     ]
-  "flow-scalar":
-    patterns: [
+  'scalar-content':
+    'patterns': [
       {
-        include: "#flow-scalar-double-quoted"
+        'include': '#comment'
       }
       {
-        include: "#flow-scalar-single-quoted"
+        'match': '!(?=\\s)'
+        'name': 'punctuation.definition.tag.non-specific.yaml'
       }
       {
-        include: "#flow-scalar-plain-in"
-      }
-    ]
-  "flow-scalar-double-quoted":
-    begin: "\""
-    beginCaptures:
-      "0":
-        name: "punctuation.definition.string.begin.miniyaml"
-    end: "\""
-    endCaptures:
-      "0":
-        name: "punctuation.definition.string.end.miniyaml"
-    name: "string.quoted.double.miniyaml"
-    patterns: [
-      {
-        match: "\\\\([0abtnvfre \"/\\\\N_Lp]|x\\d\\d|u\\d{4}|U\\d{8})"
-        name: "constant.character.escape.miniyaml"
+        'include': '#constants'
       }
       {
-        match: "\\\\\\n"
-        name: "constant.character.escape.double-quoted.newline.miniyaml"
+        'include': '#date'
+      }
+      {
+        'include': '#numeric'
+      }
+      {
+        'include': '#strings'
       }
     ]
-  "flow-scalar-plain-in":
-    patterns: [
-      {
-        include: "#flow-scalar-plain-in-implicit-type"
-      }
-      {
-        begin: '''
-          (?x)
-                                    [^\\s[-?:,\\[\\]{}#&*!|>'"%@`]]
-                                  | [?:-] [^\\s[\\[\\]{},]]
-                              
-        '''
-        end: '''
-          (?x)
-                                  (?=
-                                        \\s* $
-                                      | \\s+ \\#
-                                      | \\s* : (\\s|$)
-                                      | \\s* : [\\[\\]{},]
-                                      | \\s* [\\[\\]{},]
-                                  )
-                              
-        '''
-        name: "string.unquoted.plain.in.miniyaml"
-      }
-    ]
-  "flow-scalar-plain-in-implicit-type":
-    patterns: [
-      {
-        captures:
-          "1":
-            name: "constant.language.boolean.miniyaml"
-          "2":
-            name: "constant.numeric.integer.miniyaml"
-          "3":
-            name: "constant.numeric.float.miniyaml"
-        match: '''
-          (?x)
-                                  (?x:
-                                      (yes|Yes|YES|no|No|NO|true|True|TRUE|false|False|FALSE)
-                                      | (
-                                          (?:
-                                              [-+]? (?: 0|[1-9][0-9_]*) # (base 10)
-                                          )
-                                        )
-                                      | (
-                                          (?x:
-                                              [-+]? (?: [0-9] [0-9_]*)? \\. [0-9.]* (?: [eE] [-+] [0-9]+)? # (base 10)
-                                          )
-                                        )
-                                  )
-                              
-        '''
-      }
-    ]
-  "flow-scalar-plain-out":
-    patterns: [
-      {
-        include: "#flow-scalar-plain-out-implicit-type"
-      }
-      {
-        begin: '''
-          (?x)
-                                    [^\\s[-?:,\\[\\]{}#&*!|>'"%@`]]
-                                  | [?:-] \\S
-                              
-        '''
-        end: '''
-          (?x)
-                                  (?=
-                                        \\s* $
-                                      | \\s+ \\#
-                                      | \\s* : (\\s|$)
-                                  )
-                              
-        '''
-        name: "string.unquoted.plain.out.miniyaml"
-      }
-    ]
-  "flow-scalar-plain-out-implicit-type":
-    patterns: [
-      {
-        captures:
-          "1":
-            name: "constant.language.boolean.miniyaml"
-          "2":
-            name: "constant.numeric.integer.miniyaml"
-          "3":
-            name: "constant.numeric.float.miniyaml"
-        match: '''
-          (?x)
-                                  (?x:
-                                      | (yes|Yes|YES|no|No|NO|true|True|TRUE|false|False|FALSE)
-                                      | (
-                                          (?:
-                                              | [-+]? (?: 0|[1-9][0-9_]*) # (base 10)
-                                          )
-                                        )
-                                      | (
-                                          (?x:
-                                                [-+]? (?: [0-9] [0-9_]*)? \\. [0-9.]* (?: [eE] [-+] [0-9]+)? # (base 10)
-                                          )
-                                        )
-                                  )
-                                  (?x:
-                                      (?=
-                                            \\s* $
-                                          | \\s+ \\#
-                                          | \\s* : (\\s|$)
-                                      )
-                                  )
-                              
-        '''
-      }
-    ]
-  "flow-scalar-single-quoted":
-    begin: "'"
-    beginCaptures:
-      "0":
-        name: "punctuation.definition.string.begin.miniyaml"
-    end: "'(?!')"
-    endCaptures:
-      "0":
-        name: "punctuation.definition.string.end.miniyaml"
-    name: "string.quoted.single.miniyaml"
-    patterns: [
-      {
-        match: "''"
-        name: "constant.character.escape.single-quoted.miniyaml"
-      }
-    ]
-  "flow-sequence":
-    begin: "\\["
-    beginCaptures:
-      "0":
-        name: "punctuation.definition.sequence.begin.miniyaml"
-    end: "\\]"
-    endCaptures:
-      "0":
-        name: "punctuation.definition.sequence.end.miniyaml"
-    name: "meta.flow-sequence.miniyaml"
-    patterns: [
-      {
-        include: "#prototype"
-      }
-      {
-        match: ","
-        name: "punctuation.separator.sequence.miniyaml"
-      }
-      {
-        include: "#flow-pair"
-      }
-      {
-        include: "#flow-node"
-      }
-    ]
-  "flow-value":
-    patterns: [
-      {
-        begin: "\\G(?![},\\]])"
-        end: "(?=[},\\]])"
-        name: "meta.flow-pair.value.miniyaml"
-        patterns: [
-          {
-            include: "#flow-node"
-          }
-        ]
-      }
-    ]
-  node:
-    patterns: [
-      {
-        include: "#block-node"
-      }
-    ]
-  property:
-    begin: "(?=!|&)"
-    end: "(?!\\G)"
-    name: "meta.property.miniyaml"
-    patterns: [
-      {
-        captures:
-          "1":
-            name: "keyword.control.property.anchor.miniyaml"
-          "2":
-            name: "punctuation.definition.anchor.miniyaml"
-          "3":
-            name: "entity.name.type.anchor.miniyaml"
-          "4":
-            name: "invalid.illegal.character.anchor.miniyaml"
-        match: "\\G((&))([^\\s\\[\\]/{/},]+)(\\S+)?"
-      }
-      {
-        match: '''
-          (?x)
-                                  \\G
-                                  (?:
-                                      ! < (?: %[0-9A-Fa-f]{2} | [0-9A-Za-z\\-#;/?:@&=+$,_.!~*'()\\[\\]] )+ >
-                                    | (?:!(?:[0-9A-Za-z\\-]*!)?) (?: %[0-9A-Fa-f]{2} | [0-9A-Za-z\\-#;/?:@&=+$_.~*'()] )+
-                                    | !
-                                  )
-                                  (?=\\ |\\t|$)
-                              
-        '''
-        name: "storage.type.tag-handle.miniyaml"
-      }
-    ]
-  prototype:
-    patterns: [
-      {
-        include: "#comment"
-      }
-      {
-        include: "#property"
-      }
-    ]
-scopeName: "source.miniyaml"
+  'variables':
+    'captures':
+      '1':
+        'name': 'punctuation.definition.variable.yaml'
+    'match': '(&|\\*)\\w+$'
+    'name': 'variable.other.yaml'
