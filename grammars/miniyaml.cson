@@ -42,9 +42,6 @@
       {
         'include': '#constants'
       }
-      {
-        'include': '#erb'
-      }
     ]
   }
   {
@@ -75,9 +72,6 @@
       }
       {
         'include': '#constants'
-      }
-      {
-        'include': '#erb'
       }
     ]
   }
@@ -202,31 +196,6 @@
     'captures':
       '1':
         'name': 'constant.other.date.yaml'
-  'erb':
-    'begin': '<%+(?!>)=?'
-    'beginCaptures':
-      '0':
-        'name': 'punctuation.definition.embedded.begin.ruby'
-    'contentName': 'source.ruby.rails'
-    'end': '(%)>'
-    'endCaptures':
-      '0':
-        'name': 'punctuation.definition.embedded.end.ruby'
-      '1':
-        'name': 'source.ruby.rails'
-    'name': 'meta.embedded.line.ruby'
-    'patterns': [
-      {
-        'captures':
-          '1':
-            'name': 'punctuation.definition.comment.ruby'
-        'match': '(#).*?(?=%>)'
-        'name': 'comment.line.number-sign.ruby'
-      }
-      {
-        'include': 'source.ruby.rails'
-      }
-    ]
   'escaped_char':
     # http://yaml.org/spec/1.2/spec.html#id2776092
     'patterns': [
@@ -295,9 +264,6 @@
           {
             'include': '#escaped_char'
           }
-          {
-            'include': '#erb'
-          }
         ]
       }
       {
@@ -316,9 +282,6 @@
           {
             'match': "''"
             'name': 'constant.character.escape.yaml'
-          }
-          {
-            'include': '#erb'
           }
         ]
       }
