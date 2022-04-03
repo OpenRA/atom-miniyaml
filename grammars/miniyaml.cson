@@ -8,28 +8,18 @@
     'include': '#comment'
   }
   {
-    # - hello:
-    # look at me go:
-    'begin': '(?>^(\\s*)(-)?\\s*)([^!{@#%&*>,\'"][^#]*?)(:)\\s+'
-    'beginCaptures':
-      '2':
-        'name': 'punctuation.definition.entry.yaml'
-      '3':
-        'name': 'entity.name.tag.yaml'
-      '4':
-        'name': 'punctuation.separator.key-value.yaml'
-    'end': '^((?!\\1\\s+)|(?=\\1\\s*(-|[^!@#%&*>,].*:\\s+|#)))'
-    'patterns': [
-      {
-        'include': '#scalar-content'
-      }
-    ]
-  }
-  {
-    'include': '#strings' # For list values that take up an entire line and are not proper nodes.
+    'include': '#node'
   }
 ]
 'repository':
+  'block-pair':
+    'begin': '^\\t*(\\S+?)(?=(:))'
+    'beginCaptures':
+      '1':
+        'name': 'entity.name.tag.yaml'
+      '2':
+        'name': 'punctuation.definition.entry.yaml'
+    'end': ':(?=\\s|$)'
   'comment':
     'begin': '(?<=^|\\s)#(?!{)'
     'beginCaptures':
@@ -40,6 +30,15 @@
   'constants':
     'match': '(?<=\\s)(true|false|True|False|TRUE|FALSE|~)(?=\\s*$)'
     'name': 'constant.language.yaml'
+  'node':
+    'patterns': [
+      {
+        'include': '#block-pair'
+      }
+      {
+        'include': '#scalar-content'
+      }
+    ]
   'numeric':
     # http://www.yaml.org/spec/1.2/spec.html#id2805071
     'patterns': [
