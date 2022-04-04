@@ -13,13 +13,13 @@
 ]
 'repository':
   'block-pair':
-    'begin': '^\\t*(\\S+?)(?=(:))'
-    'beginCaptures':
-      '1':
-        'name': 'entity.name.tag.yaml'
-      '2':
-        'name': 'punctuation.definition.entry.yaml'
-    'end': ':(?=\\s|$)'
+    'match': '^\\t*(\\S+?)(?=@|:)'
+    'name': 'entity.name.tag.yaml'
+    'patterns': [
+      {
+        'include': '#node-identifier' # Including here because "block-pair" captures the entire line, including the value, so this is a subgroup.
+      }
+    ]
   'comment':
     'begin': '(?<=^|\\s)#(?!{)'
     'beginCaptures':
@@ -28,7 +28,7 @@
     'end': '$'
     'name': 'comment.line.number-sign.yaml'
   'constants':
-    'match': '(?<=\\s)(true|false|True|False|TRUE|FALSE|~)(?=\\s*$)'
+    'match': '(?::\\s)(true|false|True|False|TRUE|FALSE|~)(?=\\s*$)'
     'name': 'constant.language.yaml'
   'node':
     'patterns': [
@@ -39,37 +39,43 @@
         'include': '#block-pair'
       }
       {
+        'include': '#node-identifier' # Including here because "node-removal" captures only the node key, so this needs to be a follow-up group.
+      }
+      {
         'include': '#scalar-content'
       }
     ]
+  'node-identifier':
+    'match': '(?<=\\S)(@\\S+)(?=:\\s)'
+    'name': 'support.yaml'
   'node-removal':
-    'match': '^\\t+(-.+?)(?=:)'
+    'match': '^\\t+(-.+?)(?=@|:\\s)'
     'name': 'entity.yaml'
   'numeric':
     # http://www.yaml.org/spec/1.2/spec.html#id2805071
     'patterns': [
       {
-        'match': '[-+]?[0-9]+(?=\\s*($|#(?!#{)))'
+        'match': '(?::\\s)[-+]?[0-9]+(?=\\s*($|#(?!#{)))'
         'name': 'constant.numeric.integer.yaml'
       }
       {
-        'match': '0o[0-7]+(?=\\s*($|#(?!#{)))'
+        'match': '(?::\\s)0o[0-7]+(?=\\s*($|#(?!#{)))'
         'name': 'constant.numeric.octal.yaml'
       }
       {
-        'match': '0x[0-9a-fA-F]+(?=\\s*($|#(?!#{)))'
+        'match': '(?::\\s)0x[0-9a-fA-F]+(?=\\s*($|#(?!#{)))'
         'name': 'constant.numeric.hexadecimal.yaml'
       }
       {
-        'match': '[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?(?=\\s*($|#(?!#{)))'
+        'match': '(?::\\s)[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?(?=\\s*($|#(?!#{)))'
         'name': 'constant.numeric.float.yaml'
       }
       {
-        'match': '[-+]?(\.inf|\.Inf|\.INF)(?=\\s*($|#(?!#{)))'
+        'match': '(?::\\s)[-+]?(\.inf|\.Inf|\.INF)(?=\\s*($|#(?!#{)))'
         'name': 'constant.numeric.float.yaml'
       }
       {
-        'match': '(\.nan|\.NaN|\.NAN)(?=\\s*($|#(?!#{)))'
+        'match': '(?::\\s)(\.nan|\.NaN|\.NAN)(?=\\s*($|#(?!#{)))'
         'name': 'constant.numeric.float.yaml'
       }
     ]
@@ -84,10 +90,6 @@
     'patterns': [
       {
         'include': '#comment'
-      }
-      {
-        'match': '!(?=\\s)'
-        'name': 'punctuation.definition.tag.non-specific.yaml'
       }
       {
         'include': '#constants'
