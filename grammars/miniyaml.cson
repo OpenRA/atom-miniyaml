@@ -33,12 +33,18 @@
   'node':
     'patterns': [
       {
+        'include': '#node-removal'
+      }
+      {
         'include': '#block-pair'
       }
       {
         'include': '#scalar-content'
       }
     ]
+  'node-removal':
+    'match': '^\\t+(-.+?)(?=:)'
+    'name': 'entity.yaml'
   'numeric':
     # http://www.yaml.org/spec/1.2/spec.html#id2805071
     'patterns': [
